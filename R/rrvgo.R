@@ -61,7 +61,15 @@ calculateSimMatrix <- function(x,
   out <- apply(m, 2, function(x) all(is.na(x)))
   m[!out, !out]
 }
-
+#' calculate_term_uniqueness
+#' Calculate the term uniqueness score based on average similarity to other terms
+#' 
+#' @param simMatrix a (square) similarity matrix
+#' @return a vector of term uniqueness scores
+calculate_term_uniqueness <- function(simMatrix) {
+  term_similarities <- apply(simMatrix, 1, function(x) mean(1 - x, na.rm = TRUE))
+  1 - term_similarities
+}
 #' reduceSimMatrix
 #' Reduce a set of GO terms based on their semantic similarity and scores.
 #' 
@@ -120,7 +128,8 @@ reduceSimMatrix <- function(simMatrix, scores=NULL, threshold=0.7, orgdb, keytyp
   # sort matrix based on the score
   o <- rev(order(scores, sizes, na.last=FALSE))
   simMatrix <- simMatrix[o, o]
-  
+  # calculate term uniqueness scores
+  term_uniqueness <- calculate_term_uniqueness(simMatrix)
   # cluster terms and cut the tree at the desired threshold.
   # Then find the term with the highest score as the representative of each cluster
   cluster <- cutree(hclust(as.dist(1-simMatrix)), h=threshold)
@@ -134,7 +143,8 @@ reduceSimMatrix <- function(simMatrix, scores=NULL, threshold=0.7, orgdb, keytyp
              score=scores[match(rownames(simMatrix), names(scores))],
              size=sizes[match(rownames(simMatrix), names(sizes))],
              term=getGoTerm(rownames(simMatrix)),
-             parentTerm=getGoTerm(clusterRep[cluster]))
+             parentTerm=getGoTerm(clusterRep[cluster]),
+             termUniqueness = term_uniqueness)
 }
 
 #' getGoSize
