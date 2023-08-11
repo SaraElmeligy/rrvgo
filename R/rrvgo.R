@@ -70,6 +70,20 @@ calculate_term_uniqueness <- function(simMatrix) {
   term_similarities <- apply(simMatrix, 1, function(x) mean(1 - x, na.rm = TRUE))
   1 - term_similarities
 }
+#' calculate_term_dispensability
+#' Calculate the term dispensability score based on average similarity within a cluster
+#' 
+#' @param simMatrix a (square) similarity matrix
+#' @param cluster the cluster assignment for each term
+#' @return a vector of term dispensability scores
+calculate_term_dispensability <- function(simMatrix, cluster) {
+  term_dispensabilities <- tapply(rownames(simMatrix), cluster, function(x) {
+    avg_similarity <- mean(1 - simMatrix[x, x], na.rm = TRUE)
+    1 - avg_similarity
+  })
+  term_dispensabilities[cluster]
+}
+
 #' reduceSimMatrix
 #' Reduce a set of GO terms based on their semantic similarity and scores.
 #' 
@@ -130,10 +144,13 @@ reduceSimMatrix <- function(simMatrix, scores=NULL, threshold=0.7, orgdb, keytyp
   simMatrix <- simMatrix[o, o]
   # calculate term uniqueness scores
   term_uniqueness <- calculate_term_uniqueness(simMatrix)
+  
   # cluster terms and cut the tree at the desired threshold.
   # Then find the term with the highest score as the representative of each cluster
   cluster <- cutree(hclust(as.dist(1-simMatrix)), h=threshold)
   clusterRep <- tapply(rownames(simMatrix), cluster, function(x) x[which.max(scores[x])])
+  # calculate term dispensability scores
+  term_dispensabilities <- calculate_term_dispensability(simMatrix, cluster)
   
   # return
   data.frame(go=rownames(simMatrix),
@@ -144,7 +161,8 @@ reduceSimMatrix <- function(simMatrix, scores=NULL, threshold=0.7, orgdb, keytyp
              size=sizes[match(rownames(simMatrix), names(sizes))],
              term=getGoTerm(rownames(simMatrix)),
              parentTerm=getGoTerm(clusterRep[cluster]),
-             termUniqueness = term_uniqueness)
+             termUniqueness = term_uniqueness,
+             termDispensability = term_dispensabilities)
 }
 
 #' getGoSize
@@ -204,3 +222,5 @@ loadOrgdb <- function(orgdb) {
   }
   eval(parse(text=paste0(orgdb, "::", orgdb)))
 }
+
+

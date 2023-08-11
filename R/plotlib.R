@@ -204,3 +204,44 @@ gg_color_hue <- function(n) {
   hues = seq(15, 375, length = n + 1)
   hcl(h = hues, l = 65, c = 100)[seq_len(n)]
 }
+
+#' sunburstPlot
+#' Plot GO terms as a sunburst plot.
+#' @param reducedTerms a data.frame with the reduced terms from reduceSimMatrix()
+#' @param size what to use as point size. it is GO term's "score"
+#' @param idColumn column name for ID
+#' @param parentColumn column name for parent
+#' @param nameColumn column name for name
+#' @import plotly
+#' @return A sunburst plot created using plotly
+#' @examples
+#' \dontrun{
+#' go_analysis <- read.delim(system.file("extdata/example.txt", package="rrvgo"))
+#' simMatrix <- calculateSimMatrix(go_analysis$ID, orgdb="org.Hs.eg.db", ont="BP", method="Rel")
+#' scores <- setNames(-log10(go_analysis$qvalue), go_analysis$ID)
+#' reducedTerms <- reduceSimMatrix(simMatrix, scores, threshold=0.7, orgdb="org.Hs.eg.db")
+#' sunburstPlot(reducedTerms)
+#' }
+
+#' @export
+sunburstPlot <- function(reducedTerms, size = "size", 
+                         idColumn = "go", parentColumn = "parentTerm",
+                         nameColumn = "term") {
+  library(plotly)
+  
+  sunburst_data <- list(
+    ids = reducedTerms[[idColumn]],
+    labels = reducedTerms[[nameColumn]],
+    parents = reducedTerms[[parentColumn]],
+    values = reducedTerms[[size]]
+  )
+  plotly_sunburst <- plot_ly(
+    ids = sunburst_data$ids,
+    labels = sunburst_data$labels,
+    parents = sunburst_data$parents,
+    values = sunburst_data$values,
+    type = 'sunburst'
+  )
+  
+  plotly_sunburst
+}
