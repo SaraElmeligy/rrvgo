@@ -208,40 +208,29 @@ gg_color_hue <- function(n) {
 #' sunburstPlot
 #' Plot GO terms as a sunburst plot.
 #' @param reducedTerms a data.frame with the reduced terms from reduceSimMatrix()
-#' @param size what to use as point size. it is GO term's "score"
-#' @param idColumn column name for ID
-#' @param parentColumn column name for parent
-#' @param nameColumn column name for name
-#' @import plotly
-#' @return A sunburst plot created using plotly
+#' @param size what to use as point size. Can be either GO term's "size" or "score"
+#' @param title title of the plot. Defaults to nothing
+#' @param ... other parameters sent to sunburstR
+#' @import sunburstR
+#' @import d3r
+#' @return A sunburst plot created using sunburstR
 #' @examples
 #' \dontrun{
 #' go_analysis <- read.delim(system.file("extdata/example.txt", package="rrvgo"))
 #' simMatrix <- calculateSimMatrix(go_analysis$ID, orgdb="org.Hs.eg.db", ont="BP", method="Rel")
 #' scores <- setNames(-log10(go_analysis$qvalue), go_analysis$ID)
 #' reducedTerms <- reduceSimMatrix(simMatrix, scores, threshold=0.7, orgdb="org.Hs.eg.db")
-#' sunburstPlot(reducedTerms)
+#' sunburstPlot2(reducedTerms)
 #' }
-
 #' @export
-sunburstPlot <- function(reducedTerms, size = "size", 
-                         idColumn = "go", parentColumn = "parentTerm",
-                         nameColumn = "term") {
-  library(plotly)
-  
-  sunburst_data <- list(
-    ids = reducedTerms[[idColumn]],
-    labels = reducedTerms[[nameColumn]],
-    parents = reducedTerms[[parentColumn]],
-    values = reducedTerms[[size]]
-  )
-  plotly_sunburst <- plot_ly(
-    ids = sunburst_data$ids,
-    labels = sunburst_data$labels,
-    parents = sunburst_data$parents,
-    values = sunburst_data$values,
-    type = 'sunburst'
-  )
-  
-  plotly_sunburst
+library(sunburstR)
+library(d3r)
+sunburstPlot2 <- function(reducedTerms, size="score", title="", ...) {
+  if(!all(sapply(c("sunburstR"), requireNamespace, quietly=TRUE))) {
+    stop("Package sunburstR and/or its dependencies not available. ",
+         "Consider installing it before using this function.", call.=FALSE)
+  }
+  data <- data.frame(level1 =reducedTerms$parentTerm ,level2= reducedTerms$term  , size = reducedTerms$size)
+  tree <- d3_nest(data, value_cols = "size")
+  sunburst(tree)
 }

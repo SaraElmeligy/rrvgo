@@ -21,7 +21,10 @@ Imports: GOSemSim,
          grid,
          stats,
          methods,
-         umap
+         umap,
+         plotly,
+         sunburstR,
+         d3r
 Suggests: 
     knitr,
     rmarkdown,
