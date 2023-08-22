@@ -220,12 +220,10 @@ gg_color_hue <- function(n) {
 #' simMatrix <- calculateSimMatrix(go_analysis$ID, orgdb="org.Hs.eg.db", ont="BP", method="Rel")
 #' scores <- setNames(-log10(go_analysis$qvalue), go_analysis$ID)
 #' reducedTerms <- reduceSimMatrix(simMatrix, scores, threshold=0.7, orgdb="org.Hs.eg.db")
-#' sunburstPlot2(reducedTerms)
+#' sunburstPlot(reducedTerms)
 #' }
 #' @export
-library(sunburstR)
-library(d3r)
-sunburstPlot2 <- function(reducedTerms, size="score", title="", ...) {
+sunburstPlot <- function(reducedTerms, size="score", title="", ...) {
   if(!all(sapply(c("sunburstR"), requireNamespace, quietly=TRUE))) {
     stop("Package sunburstR and/or its dependencies not available. ",
          "Consider installing it before using this function.", call.=FALSE)

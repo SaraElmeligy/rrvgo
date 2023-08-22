@@ -77,6 +77,7 @@ shinyApp(
             tabPanel("simMatrixPlot", div(style='overflow-x: scroll', plotlyOutput("simMatrixPlot"))),
             tabPanel("scatterPlot"  , div(style='overflow-x: scroll', plotlyOutput("scatterPlot"))),
             tabPanel("treemapPlot"  , div(style='overflow-x: scroll', plotOutput("treemapPlot"))),
+            tabPanel("sunburstPlot"  , div(style='overflow-x: scroll', plotOutput("sunburstPlot"))),
             tabPanel("wordcloudPlot", div(style='overflow-x: scroll', plotOutput("wordcloudPlot")))
           ),
           tabBox(width=NULL,
@@ -209,6 +210,10 @@ shinyApp(
     output$treemapPlot <- renderPlot({
       req(reducedTerms(), cancelOutput=TRUE)
       treemapPlot(reducedTerms())
+    })
+    output$sunburstPlot <- renderPlot({
+      req(reducedTerms(), cancelOutput=TRUE)
+      sunburstPlot (reducedTerms())
     })
     
     output$wordcloudPlot <- renderPlot({
