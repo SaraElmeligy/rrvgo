@@ -232,3 +232,32 @@ sunburstPlot <- function(reducedTerms, size="score", title="", ...) {
   tree <- d3_nest(data, value_cols = "size")
   sunburst(tree)
 }
+#' scaterplot for 3 ontolgies
+#' @param go_list A data frame containing GO terms with columns "ID" and "Ontology".
+#' @return A ggplot2 scatterplot showing parent GO terms from three ontologies.
+#' @examples
+#' \dontrun{
+#' go_analysis <- read.delim(system.file("extdata/example.txt", package="rrvgo"))
+#' SplitGOTerms(go_analysis)
+SplitGOTerms <- function(go_analysis) {
+  all_reduced_terms <- list()
+  
+  for (ont in c("BP", "MF", "CC")) {
+    GO_subset <- go_analysis[go_analysis$Ontology == ont, ]
+    
+    # Calculate similarity matrix
+    simMatrix <- calculateSimMatrix(GO_subset$ID, ont = ont,orgdb="org.Hs.eg.db")
+    
+    # Reduce the matrix
+    reducedTerms <- reduceSimMatrix(simMatrix,orgdb="org.Hs.eg.db")
+    
+    all_reduced_terms[[ont]] <- reducedTerms
+  }
+  
+  # Combine reduced terms from all ontologies
+  reducedTerms_combined <- do.call(rbind, all_reduced_terms)
+  
+  # Create a scatterplot with scores and p-values
+  scatterPlot(reducedTerms_combined, size = "score", addLabel = FALSE, title = "GO Term Analysis")
+}
+

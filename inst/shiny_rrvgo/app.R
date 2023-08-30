@@ -213,7 +213,7 @@ shinyApp(
     })
     output$sunburstPlot <- renderPlot({
       req(reducedTerms(), cancelOutput=TRUE)
-      sunburstPlot (reducedTerms())
+      sunburstPlot(reducedTerms())
     })
     
     output$wordcloudPlot <- renderPlot({
