@@ -258,6 +258,6 @@ SplitGOTerms <- function(go_analysis) {
   reducedTerms_combined <- do.call(rbind, all_reduced_terms)
   
   # Create a scatterplot with scores and p-values
-  scatterPlot(reducedTerms_combined, size = "score", addLabel = FALSE, title = "GO Term Analysis")
+  Three_T_scatterPlot(reducedTerms_combined, size = "score", addLabel = FALSE, title = "GO Term Analysis")
 }
 
